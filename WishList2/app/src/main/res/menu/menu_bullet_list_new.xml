@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- TO SAVE BULLET LIST-->
+    <item
+        android:enabled="true"
+        android:title="save"
+        android:id="@+id/action_activity_save_bullet_list"
+        android:icon="@android:drawable/ic_menu_save"
+        android:orderInCategory="0"
+        app:showAsAction="always"
+        >
+
+    </item>
+
+    <!-- TO DELETE BULLET LIST-->
+    <item
+        android:enabled="true"
+        android:title="save"
+        android:id="@+id/action_activity_delete_bullet_list"
+        android:icon="@android:drawable/ic_menu_delete"
+        android:orderInCategory="0"
+        app:showAsAction="always"
+        >
+
+    </item>
+
+    <!-- TO ADD BULLET POINT-->
+    <item
+        android:enabled="true"
+        android:title="add"
+        android:id="@+id/action_activity_add_bullet_point"
+        android:icon="@android:drawable/ic_menu_add"
+        android:orderInCategory="0"
+        app:showAsAction="always"
+        >
+
+    </item>
+</menu>
