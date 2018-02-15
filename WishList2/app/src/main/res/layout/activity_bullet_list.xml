@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
@@ -8,21 +8,79 @@
     android:orientation="vertical"
     tools:context="com.example.marta.wishlist2.BulletListActivity">
 
-    <EditText
-        android:id="@+id/bulletlist_title"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Type a title"
-        android:inputType="textPersonName"
-        android:singleLine="true" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/bulletlist_bullet_points"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout_editor_absoluteX="8dp"
-        tools:layout_editor_absoluteY="8dp"
-        />
+        android:orientation="vertical">
 
-</LinearLayout>
+        <EditText
+            android:id="@+id/bulletlist_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Type a title"
+            android:inputType="textPersonName"
+            android:singleLine="true"
+            />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/bulletlist_bullet_points"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:layout_editor_absoluteX="8dp"
+            tools:layout_editor_absoluteY="8dp" />
+
+
+    </LinearLayout>
+
+        <com.github.clans.fab.FloatingActionMenu
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:id="@+id/floating_menu"
+            android:layout_margin="5dp"
+            app:menu_showShadow="true"
+            app:menu_fab_label=""
+            app:menu_openDirection="up"
+            >
+
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fb_button_add"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_label="Add"
+                app:fab_size="mini"
+                android:src="@drawable/add"
+
+                />
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fb_button_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_label="Delete"
+                app:fab_size="mini"
+                android:src="@drawable/delete"
+
+                />
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fb_button_secret"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_label="Secret"
+                app:fab_size="mini"
+                android:src="@drawable/secret"
+
+                />
+            <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/fb_button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:fab_label="Save"
+                app:fab_size="mini"
+                android:src="@drawable/save"
+
+                />
+
+        </com.github.clans.fab.FloatingActionMenu>
+
+</FrameLayout>

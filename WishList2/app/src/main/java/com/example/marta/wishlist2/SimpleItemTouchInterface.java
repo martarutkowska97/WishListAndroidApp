@@ -5,7 +5,6 @@ package com.example.marta.wishlist2;
  */
 
 public interface SimpleItemTouchInterface {
-    public void onItemDismiss(int position);
-
-    public void onItemMove(int positionSource, int positionTarget);
+    void onItemDismiss(int position);
+    void onItemMove(int positionSource, int positionTarget);
 }

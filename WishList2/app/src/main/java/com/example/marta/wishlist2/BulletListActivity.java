@@ -1,5 +1,6 @@
 package com.example.marta.wishlist2;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,17 +11,22 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import com.github.clans.fab.FloatingActionButton;
+
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 public class BulletListActivity extends AppCompatActivity {
@@ -37,8 +43,13 @@ public class BulletListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR); getSupportActionBar().hide();
+        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+
+
         setContentView(R.layout.activity_bullet_list);
-        this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+        //this.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         title = (EditText)findViewById(R.id.bulletlist_title);
         recyclerView = (RecyclerView)findViewById(R.id.bulletlist_bullet_points);
@@ -46,7 +57,15 @@ public class BulletListActivity extends AppCompatActivity {
 
         if(currentWishPanel == null)
         {
-            currentWishPanel = new WishPanel("", System.currentTimeMillis(), new ArrayList<BulletPoint>());
+            Bundle bundle = getIntent().getExtras();
+            if(bundle == null)
+                Log.d("BUG", "BUNDLE IS NULL O CO CHODZI");
+            else
+            {
+                int category = bundle.getInt("Category", 0);
+                currentWishPanel = new WishPanel("", System.currentTimeMillis(), new ArrayList<BulletPoint>());
+                currentWishPanel.setCategory(category);
+            }
         }
         else {
             title.setText(currentWishPanel.getTitle());
@@ -62,21 +81,54 @@ public class BulletListActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         plusClicked=false;
+        menuOptions();
     }//protected void onCreate(Bundle savedInstanceState)
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_bullet_list_new,menu);
-        return true;
-    }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+    public void menuOptions(){
+        FloatingActionButton add=(FloatingActionButton) findViewById(R.id.fb_button_add);
+        FloatingActionButton delete=(FloatingActionButton) findViewById(R.id.fb_button_delete);
+        FloatingActionButton save=(FloatingActionButton) findViewById(R.id.fb_button_save);
+        FloatingActionButton secret=(FloatingActionButton) findViewById(R.id.fb_button_secret);
 
-            case R.id.action_activity_save_bullet_list:
+        final AlertDialog.Builder deleteAlert= new AlertDialog.Builder(this)
+                        .setTitle("Are You sure?")
+                .setMessage("You are about to delete "+title.getText().toString()+"!")
+                .setPositiveButton("YES", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent resultIntent = new Intent();
+                        resultIntent.putExtra("Wish Panel", (Parcelable) currentWishPanel);
+                        setResult(WishPanelSelectionActivity.DELETE_WISH_RESULT_CODE, resultIntent);
+                        finish();
+                    }
+                })
+                .setNegativeButton("NO", null)
+                .setCancelable(false);
+
+        add.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNewBulletPoint();
+                updateArrayList();
+                plusClicked=true;
+            }
+        });
+
+        delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                deleteAlert.show();
+            }
+        });
+
+        save.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
                 if (title.getText().toString().isEmpty()) {
-                    Toast.makeText(this, "Please, enter the title!", Toast.LENGTH_SHORT);
+                    Toast.makeText(getApplicationContext(), "Please, enter the title!", Toast.LENGTH_SHORT).show();
                 } else {
                     updateArrayList();
                     currentWishPanel.setTitle(title.getText().toString());
@@ -85,39 +137,54 @@ public class BulletListActivity extends AppCompatActivity {
                     setResult(Activity.RESULT_OK, resultIntent);
                     finish();
                 }
-                break;
 
-            case R.id.action_activity_delete_bullet_list:
-                AlertDialog.Builder deleteAlert= new AlertDialog.Builder(this)
-                        .setTitle("Are You sure?")
-                        .setMessage("You are about to delete "+title.getText().toString()+"!")
-                        //we need to set positive and negative button
-                        .setPositiveButton("YES", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                Intent resultIntent = new Intent();
-                                resultIntent.putExtra("Wish Panel", (Parcelable) currentWishPanel);
-                                setResult(WishPanelSelectionActivity.DELETE_WISH_RESULT_CODE, resultIntent);
-                                finish();
-                            }
-                        })
-                        //if click no does nothing
-                        .setNegativeButton("NO", null)
-                        //clicking anywhere else of the alertdialog does nothing
-                        .setCancelable(false);
-                deleteAlert.show();
+            }
+        });
+
+        secret.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                final AlertDialog.Builder dialogBulider=new AlertDialog.Builder(BulletListActivity.this);
+                View view=getLayoutInflater().inflate(R.layout.pop_up_window,null);
+                final EditText password=view.findViewById(R.id.edit_text_set_password);
+                final EditText repeatPassword=view.findViewById(R.id.edit_text_repeat_password);
+                Button setPassword=view.findViewById(R.id.button_set_password);
+
+                dialogBulider.setView(view);
+                final AlertDialog dialog=dialogBulider.create();
+                dialog.show();
+
+                setPassword.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                        if(password.getText().toString().isEmpty() && repeatPassword.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),"Please fill the spaces!",Toast.LENGTH_SHORT).show();
+                        }
+                        else if(password.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),"Please enter the password!",Toast.LENGTH_SHORT).show();
+                        }
+                        else if(repeatPassword.getText().toString().isEmpty()){
+                            Toast.makeText(getApplicationContext(),"Please repeat the password!",Toast.LENGTH_SHORT).show();
+                        }
+                        else if(!repeatPassword.getText().toString().equals(password.getText().toString())){
+                            System.out.println(password.getText().toString());
+                            System.out.println(repeatPassword.getText().toString());
+
+                            Toast.makeText(getApplicationContext(),"Different passwords!",Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            currentWishPanel.setPassword(repeatPassword.getText().toString());
+                            currentWishPanel.setSecret(true);
+                            dialog.dismiss();
+                        }
+                    }
+                });
+            }
+        });
 
 
-                break;
-
-            case R.id.action_activity_add_bullet_point:
-                addNewBulletPoint();
-                updateArrayList();
-                plusClicked=true;
-                break;
-        }
-
-        return true;
     }
 
     @Override
@@ -136,6 +203,7 @@ public class BulletListActivity extends AppCompatActivity {
             discardChanges.show();
         }
         else{
+            setResult(Activity.RESULT_CANCELED);
             finish();
         }
     }
@@ -154,6 +222,7 @@ public class BulletListActivity extends AppCompatActivity {
 
 
     }
+
     private void updateRecyclerView(){
         for(int i=0;i<content.size();i++) {
             BulletPoint bp=content.get(i);
@@ -199,14 +268,11 @@ public class BulletListActivity extends AppCompatActivity {
             return content.size();
         }
 
-        //tutaj metody usuń i drag and drop
-
         public void onItemMove(int positionSource, int positionTarget){
-
             Collections.swap(content,positionSource,positionTarget);
             notifyItemMoved(positionSource,positionTarget);
-
         }
+
         public void onItemDismiss(int position){
             content.remove(position);
             notifyItemRemoved(position);

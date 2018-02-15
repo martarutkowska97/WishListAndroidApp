@@ -3,7 +3,9 @@ package com.example.marta.wishlist2;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Image;
 import android.os.Parcelable;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -14,12 +16,16 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.chootdev.recycleclick.RecycleClick;
+import com.github.clans.fab.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +40,7 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
     int index_to_mod = -1;
 
     RecyclerView recyclerView;
-    Button addButton;
+    FloatingActionButton addButton;
     ArrayList<WishPanel> content;
     WPAdapter wpAdapter;
 
@@ -42,15 +48,16 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR); getSupportActionBar().hide();
         setContentView(R.layout.activity_wish_panel_selection);
 
         recyclerView = (RecyclerView) findViewById(R.id.wishpanels_all_panels);
-        addButton = (Button) findViewById(R.id.button_add_new);
+        addButton = (FloatingActionButton) findViewById(R.id.floating_button_add_new);
         final Context context = this;
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivityForResult(new Intent(context, BulletListActivity.class), ADD_WISH_CODE);
+                startActivityForResult(new Intent(context, CathegoryActivity.class), ADD_WISH_CODE);
             }
         });
 
@@ -69,15 +76,38 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
             ItemTouchHelper itemTouchHelper=new ItemTouchHelper(callback);
             itemTouchHelper.attachToRecyclerView(recyclerView);
 
-
             RecycleClick.addTo(recyclerView).setOnItemClickListener(new RecycleClick.OnItemClickListener() {
                 @Override
-                public void onItemClicked(RecyclerView recyclerView, int position, View v) {
+                public void onItemClicked(RecyclerView recyclerView, final int position, View v) {
                     index_to_mod = position;
-                   // String fileName= ((WishPanel)wpAdapter.getItem(position)).getDateOfCreation()+Utilities.WISH_PANEL_FILE_EXTENSION;
-                    Intent viewWishListIntent= new Intent(getApplicationContext(),BulletListActivity.class);
+
+                    final Intent viewWishListIntent= new Intent(getApplicationContext(),BulletListActivity.class);
                     viewWishListIntent.putExtra("CurrentWishPanel", (Parcelable)content.get(position));
-                    startActivityForResult(viewWishListIntent, MOD_WISH_CODE);
+                    final AlertDialog.Builder dialogBulider=new AlertDialog.Builder(WishPanelSelectionActivity.this);
+                    View view=getLayoutInflater().inflate(R.layout.pop_up_enter_password,null);
+                    final EditText password=view.findViewById(R.id.edit_text_enter_password);
+                    Button setPassword=view.findViewById(R.id.button_enter_password);
+                    dialogBulider.setView(view);
+                    final AlertDialog dialog=dialogBulider.create();
+
+                    if(content.get(position).getSecret()) {
+                        dialog.show();
+                        setPassword.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                if(password.getText().toString().equals(content.get(position).getPassword())){
+                                    startActivityForResult(viewWishListIntent, MOD_WISH_CODE);
+                                }
+                                else if(!password.getText().toString().equals(content.get(position).getPassword())){
+                                    Toast.makeText(getApplicationContext(),"Wrong password!",Toast.LENGTH_SHORT);
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        dialog.dismiss();
+                        startActivityForResult(viewWishListIntent, MOD_WISH_CODE);
+                    }
                 }
             });
         }
@@ -85,45 +115,44 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode){
-            case MOD_WISH_CODE:
-            {
-                if(resultCode== Activity.RESULT_OK) {
-                    WishPanel wishPanel = data.getParcelableExtra("Wish Panel");
-                    content.set(index_to_mod, wishPanel);
-                    wpAdapter.notifyItemChanged(index_to_mod);
-                    //zapis do pliku, podmiana
-                    //Utilities.saveAllBulletPoints(getApplicationContext(), wishPanel.getContent(), wishPanel);
-                    if (Utilities.saveWishPanel(getApplicationContext(), wishPanel)) {
-                        Toast.makeText(this, "Note is saved!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Cannot save the note, make sure you have enough space on your device!", Toast.LENGTH_LONG).show();
+        if(data!=null) {
+            switch (requestCode) {
+                case MOD_WISH_CODE: {
+                    if (resultCode == Activity.RESULT_OK) {
+                        WishPanel wishPanel = data.getParcelableExtra("Wish Panel");
+                        content.set(index_to_mod, wishPanel);
+                        wpAdapter.notifyItemChanged(index_to_mod);
+                        //zapis do pliku, podmiana
+                        //Utilities.saveAllBulletPoints(getApplicationContext(), wishPanel.getContent(), wishPanel);
+                        if (Utilities.saveWishPanel(getApplicationContext(), wishPanel)) {
+                            Toast.makeText(this, "Note is saved!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Cannot save the note, make sure you have enough space on your device!", Toast.LENGTH_LONG).show();
+                        }
+                    } else if (resultCode == DELETE_WISH_RESULT_CODE) {
+                        WishPanel wishPanel = data.getParcelableExtra("Wish Panel");
+                        Utilities.deleteWishPanel(getApplicationContext(), String.valueOf(wishPanel.getDateOfCreation()) + Utilities.WISH_PANEL_FILE_EXTENSION);
+                        content.remove(index_to_mod);
+                        wpAdapter.notifyItemRemoved(index_to_mod);
                     }
+                    break;
                 }
-                else if(resultCode==DELETE_WISH_RESULT_CODE){
-                    WishPanel wishPanel=data.getParcelableExtra("Wish Panel");
-                    Utilities.deleteWishPanel(getApplicationContext(),String.valueOf(wishPanel.getDateOfCreation())+Utilities.WISH_PANEL_FILE_EXTENSION);
-                    content.remove(index_to_mod);
-                    wpAdapter.notifyItemRemoved(index_to_mod);
-                }
-                break;
-            }
-            case ADD_WISH_CODE:
-            {
-                if(resultCode==Activity.RESULT_OK) {
-                    WishPanel wishPanel = data.getParcelableExtra("Wish Panel");
-                    content.add(wishPanel);
-                    wpAdapter.notifyItemInserted(content.size() - 1);
-                    //zapis do pliku, nowy
+                case ADD_WISH_CODE: {
+                    if (resultCode == Activity.RESULT_OK) {
+                        WishPanel wishPanel = data.getParcelableExtra("Wish Panel");
+                        content.add(wishPanel);
+                        wpAdapter.notifyItemInserted(content.size() - 1);
+                        //zapis do pliku, nowy
 
-                    //Utilities.saveAllBulletPoints(getApplicationContext(), wishPanel.getContent(), wishPanel);
-                    if (Utilities.saveWishPanel(getApplicationContext(), wishPanel)) {
-                        Toast.makeText(this, "Note is saved!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(this, "Cannot save the note, make sure you have enough space on your device!", Toast.LENGTH_LONG).show();
+                        //Utilities.saveAllBulletPoints(getApplicationContext(), wishPanel.getContent(), wishPanel);
+                        if (Utilities.saveWishPanel(getApplicationContext(), wishPanel)) {
+                            Toast.makeText(this, "Note is saved!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(this, "Cannot save the note, make sure you have enough space on your device!", Toast.LENGTH_LONG).show();
+                        }
                     }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -145,8 +174,12 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(WishPanelSelectionActivity.ViewHolder holder, int position) {
-            holder.date.setText(content.get(position).dateToString(getApplicationContext()));
+
             holder.title.setText(content.get(position).getTitle());
+            holder.imageView.setImageResource((int)Utilities.Images().get(content.get(position).getCategory()));
+            if(content.get(position).getSecret()) {
+                holder.imageViewSecret.setImageResource(R.drawable.secret2);
+            }
         }
 
         @Override
@@ -166,18 +199,20 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
             Collections.swap(content,positionTarget,positionSource);
             notifyItemMoved(positionSource,positionTarget);
         }
-
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView date;
         TextView title;
+        ImageView imageView;
+        ImageView imageViewSecret;
 
         public ViewHolder(View view){
             super(view);
-            date=view.findViewById(R.id.wishpanel_date);
+
+            imageView=view.findViewById(R.id.imageview_secret);
             title=view.findViewById(R.id.wishpanel_title);
+            imageViewSecret=view.findViewById(R.id.imageview_cat);
         }
     }
 }

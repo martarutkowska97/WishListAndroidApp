@@ -3,8 +3,6 @@ package com.example.marta.wishlist2;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 
-import com.woxthebox.draglistview.DragItemAdapter;
-
 /**
  * Created by marta on 2018-02-05.
  */
@@ -44,14 +42,8 @@ public class SimpleItemTouchHelper extends ItemTouchHelper.Callback {
             return true;
         }
 
-
         @Override
         public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
             mAdapter.onItemDismiss(viewHolder.getAdapterPosition());
         }
-
-
-
-
-
 }

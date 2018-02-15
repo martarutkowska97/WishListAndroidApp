@@ -1,27 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_weight="0"
+        android:id="@+id/imageview_secret"
+        android:layout_margin="5dp"
+        />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/wishpanel_title"
+        android:layout_weight="1"
         android:text="TITLE"
         android:textAppearance="?android:attr/textAppearanceLarge"
 
         />
 
-    <TextView
-        android:id="@+id/wishpanel_date"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/wishpanel_title"
-        android:text="dd/mm/yyyy"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+    <ImageView
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="left"
+        android:layout_margin="5dp"
+        android:layout_weight="0"
+        android:id="@+id/imageview_cat"/>
 
 
-</RelativeLayout>
+
+
+
+
+
+
+</LinearLayout>

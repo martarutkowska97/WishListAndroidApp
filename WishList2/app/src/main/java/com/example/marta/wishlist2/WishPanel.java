@@ -18,17 +18,26 @@ public class WishPanel implements Serializable, Parcelable {
     private String title;
     private long dateOfCreation;
     private ArrayList<BulletPoint> content;
+    private boolean secret;
+    private String password;
+    private int category;
 
     public WishPanel(String title, long dateOfCreation, ArrayList<BulletPoint> content) {
         this.title = title;
         this.dateOfCreation = dateOfCreation;
         this.content = content;
+        secret=false;
+        password=null;
+        category=0;
     }
 
     public WishPanel(Parcel parcel){
         title = parcel.readString();
         dateOfCreation = parcel.readLong();
         content = parcel.readArrayList(BulletPoint.class.getClassLoader());
+        secret= (parcel.readInt() == 1);
+        password=parcel.readString();
+        category=parcel.readInt();
     }
 
     public String getTitle() {
@@ -40,6 +49,9 @@ public class WishPanel implements Serializable, Parcelable {
     public ArrayList<BulletPoint> getContent(){
         return content;
     }
+    public boolean getSecret(){return secret;}
+    public String getPassword(){return password;}
+    public int getCategory(){return category;}
 
     public void setTitle(String title1){
         title=title1;
@@ -50,6 +62,9 @@ public class WishPanel implements Serializable, Parcelable {
     public void setContent(ArrayList<BulletPoint> content1){
         content=content1;
     }
+    public void setSecret(boolean secret){this.secret=secret;}
+    public void setPassword(String password){this.password=password;}
+    public void setCategory(int category){this.category=category;}
 
 
     public String dateToString(Context contex){
@@ -70,6 +85,9 @@ public class WishPanel implements Serializable, Parcelable {
         dest.writeString(title);
         dest.writeLong(dateOfCreation);
         dest.writeList(content);
+        dest.writeInt(secret ? 1 : 0);
+        dest.writeString(password);
+        dest.writeInt(category);
     }
 
     public static final Parcelable.Creator<WishPanel> CREATOR

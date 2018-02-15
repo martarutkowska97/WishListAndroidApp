@@ -30,4 +30,6 @@ dependencies {
     compile 'com.github.woxthebox:draglistview:1.5.1'
     compile 'jp.wasabeef:recyclerview-animators:2.2.7'
 
-    compile 'com.chootdev:recycleclick:1.0.0'}
+    compile 'com.chootdev:recycleclick:1.0.0'
+    compile 'com.github.clans:fab:1.6.4'
+}
