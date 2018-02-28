@@ -86,10 +86,17 @@ public class BulletListActivity extends AppCompatActivity {
 
 
     public void menuOptions(){
-        FloatingActionButton add=(FloatingActionButton) findViewById(R.id.fb_button_add);
-        FloatingActionButton delete=(FloatingActionButton) findViewById(R.id.fb_button_delete);
-        FloatingActionButton save=(FloatingActionButton) findViewById(R.id.fb_button_save);
-        FloatingActionButton secret=(FloatingActionButton) findViewById(R.id.fb_button_secret);
+         FloatingActionButton add=(FloatingActionButton) findViewById(R.id.fb_button_add);
+         FloatingActionButton delete=(FloatingActionButton) findViewById(R.id.fb_button_delete);
+         FloatingActionButton save=(FloatingActionButton) findViewById(R.id.fb_button_save);
+         final FloatingActionButton secret=(FloatingActionButton) findViewById(R.id.fb_button_secret);
+
+         if(!currentWishPanel.getSecret()){
+             secret.setLabelText("Secret");
+         }
+         else{
+             secret.setLabelText("Unsecret");
+         }
 
         final AlertDialog.Builder deleteAlert= new AlertDialog.Builder(this)
                         .setTitle("Are You sure?")
@@ -146,41 +153,48 @@ public class BulletListActivity extends AppCompatActivity {
             public void onClick(View v) {
 
                 final AlertDialog.Builder dialogBulider=new AlertDialog.Builder(BulletListActivity.this);
-                View view=getLayoutInflater().inflate(R.layout.pop_up_window,null);
-                final EditText password=view.findViewById(R.id.edit_text_set_password);
-                final EditText repeatPassword=view.findViewById(R.id.edit_text_repeat_password);
-                Button setPassword=view.findViewById(R.id.button_set_password);
+                final View viewSecret=getLayoutInflater().inflate(R.layout.pop_up_window,null);
 
-                dialogBulider.setView(view);
-                final AlertDialog dialog=dialogBulider.create();
-                dialog.show();
+                final EditText password=viewSecret.findViewById(R.id.edit_text_set_password);
+                final EditText repeatPassword=viewSecret.findViewById(R.id.edit_text_repeat_password);
 
-                setPassword.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
+                Button setPassword=viewSecret.findViewById(R.id.button_set_password);
 
-                        if(password.getText().toString().isEmpty() && repeatPassword.getText().toString().isEmpty()){
-                            Toast.makeText(getApplicationContext(),"Please fill the spaces!",Toast.LENGTH_SHORT).show();
-                        }
-                        else if(password.getText().toString().isEmpty()){
-                            Toast.makeText(getApplicationContext(),"Please enter the password!",Toast.LENGTH_SHORT).show();
-                        }
-                        else if(repeatPassword.getText().toString().isEmpty()){
-                            Toast.makeText(getApplicationContext(),"Please repeat the password!",Toast.LENGTH_SHORT).show();
-                        }
-                        else if(!repeatPassword.getText().toString().equals(password.getText().toString())){
-                            System.out.println(password.getText().toString());
-                            System.out.println(repeatPassword.getText().toString());
 
-                            Toast.makeText(getApplicationContext(),"Different passwords!",Toast.LENGTH_LONG).show();
+                if(currentWishPanel.getSecret()){
+                    currentWishPanel.setPassword("");
+                    currentWishPanel.setSecret(false);
+                    secret.setLabelText("Secret");
+                }
+
+                else {
+                    dialogBulider.setView(viewSecret);
+                    final AlertDialog dialog = dialogBulider.create();
+                    dialog.show();
+
+                    setPassword.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+
+                            if (password.getText().toString().isEmpty() && repeatPassword.getText().toString().isEmpty()) {
+                                Toast.makeText(getApplicationContext(), "Please fill the spaces!", Toast.LENGTH_SHORT).show();
+                            } else if (password.getText().toString().isEmpty()) {
+                                Toast.makeText(getApplicationContext(), "Please enter the password!", Toast.LENGTH_SHORT).show();
+                            } else if (repeatPassword.getText().toString().isEmpty()) {
+                                Toast.makeText(getApplicationContext(), "Please repeat the password!", Toast.LENGTH_SHORT).show();
+                            } else if (!repeatPassword.getText().toString().equals(password.getText().toString())) {
+                                Toast.makeText(getApplicationContext(), "Different passwords!", Toast.LENGTH_LONG).show();
+                            } else {
+                                currentWishPanel.setPassword(repeatPassword.getText().toString());
+                                currentWishPanel.setSecret(true);
+
+                                secret.setLabelText("Unsecret");
+                                dialog.dismiss();
+                            }
                         }
-                        else {
-                            currentWishPanel.setPassword(repeatPassword.getText().toString());
-                            currentWishPanel.setSecret(true);
-                            dialog.dismiss();
-                        }
-                    }
-                });
+
+                    });
+                }
             }
         });
 

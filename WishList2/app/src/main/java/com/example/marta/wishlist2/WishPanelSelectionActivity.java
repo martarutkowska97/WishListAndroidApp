@@ -1,5 +1,6 @@
 package com.example.marta.wishlist2;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -26,6 +27,8 @@ import android.widget.Toast;
 
 import com.chootdev.recycleclick.RecycleClick;
 import com.github.clans.fab.FloatingActionButton;
+import com.goodiebag.pinview.Pinview;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -87,6 +90,8 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
                     View view=getLayoutInflater().inflate(R.layout.pop_up_enter_password,null);
                     final EditText password=view.findViewById(R.id.edit_text_enter_password);
                     Button setPassword=view.findViewById(R.id.button_enter_password);
+                    Button forgotPassword=view.findViewById(R.id.button_forgot_password);
+
                     dialogBulider.setView(view);
                     final AlertDialog dialog=dialogBulider.create();
 
@@ -96,6 +101,7 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
                             @Override
                             public void onClick(View v) {
                                 if(password.getText().toString().equals(content.get(position).getPassword())){
+                                    dialog.dismiss();
                                     startActivityForResult(viewWishListIntent, MOD_WISH_CODE);
                                 }
                                 else if(!password.getText().toString().equals(content.get(position).getPassword())){
@@ -103,9 +109,18 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
                                 }
                             }
                         });
+
+                        forgotPassword.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+
+                                dialog.dismiss();
+
+                            }
+                        });
                     }
                     else {
-                        dialog.dismiss();
+                        //dialog.dismiss();
                         startActivityForResult(viewWishListIntent, MOD_WISH_CODE);
                     }
                 }
@@ -157,6 +172,43 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
         }
     }
 
+    private void enterPin(){
+        final AlertDialog.Builder dialogBulider=new AlertDialog.Builder(WishPanelSelectionActivity.this);
+        View view=getLayoutInflater().inflate(R.layout.pop_up_enter_pin,null);
+        dialogBulider.setView(view);
+        final AlertDialog dialog=dialogBulider.create();
+        final Pinview pinview=view.findViewById(R.id.pin_view);
+        Button setNewPassword=view.findViewById(R.id.button_set_pin);
+        dialog.show();
+        setNewPassword.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(pinview.getValue().length()<4){
+                    Toast.makeText(getApplicationContext(),"Please fill the spaces!",Toast.LENGTH_SHORT);
+                }
+                else if(!pinview.getValue().equals(Utilities.loadPin(getApplicationContext()))){
+
+                    Toast.makeText(getApplicationContext(),"Wrong PIN number!",Toast.LENGTH_SHORT);
+                }
+                else if(pinview.getValue().equals(Utilities.loadPin(getApplicationContext()))){
+
+                    dialog.dismiss();
+                    changePassword();
+                }
+            }
+        });
+    }
+
+    private void changePassword(){
+        final AlertDialog.Builder dialogBulider=new AlertDialog.Builder(WishPanelSelectionActivity.this);
+        View view=getLayoutInflater().inflate(R.layout.pop_up_window,null);
+        dialogBulider.setView(view);
+        final AlertDialog dialog=dialogBulider.create();
+
+
+
+    }
+
     public class WPAdapter extends RecyclerView.Adapter<WishPanelSelectionActivity.ViewHolder> implements SimpleItemTouchInterface{
 
         LayoutInflater mLayoutInflater;
@@ -176,7 +228,8 @@ public class WishPanelSelectionActivity extends AppCompatActivity {
         public void onBindViewHolder(WishPanelSelectionActivity.ViewHolder holder, int position) {
 
             holder.title.setText(content.get(position).getTitle());
-            holder.imageView.setImageResource((int)Utilities.Images().get(content.get(position).getCategory()));
+            ImageLoader.getInstance().displayImage((String)Utilities.getInstance(getApplicationContext()).ImagesUri().get(content.get(position).getCategory()), holder.imageView);
+
             if(content.get(position).getSecret()) {
                 holder.imageViewSecret.setImageResource(R.drawable.secret2);
             }

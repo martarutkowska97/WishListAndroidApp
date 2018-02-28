@@ -15,6 +15,8 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.nostra13.universalimageloader.core.ImageLoader;
+
 import java.util.ArrayList;
 
 public class CathegoryActivity extends AppCompatActivity {
@@ -22,7 +24,7 @@ public class CathegoryActivity extends AppCompatActivity {
     public static final int CATEGORY_RESULT_CODE = 0;
 
     GridView gridView;
-    static ArrayList images_id= new ArrayList();//int
+    static ArrayList<String> images_uri= new ArrayList();
     static ArrayList <String> names=new ArrayList();
     CathegoryAdapter cathegoryAdapter;
 
@@ -34,8 +36,8 @@ public class CathegoryActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cathegory);
         gridView=(GridView)findViewById(R.id.grid_view_cathegory);
 
-        names=Utilities.Names();
-        images_id=Utilities.Images();
+        names=Utilities.getInstance(getApplicationContext()).Names();
+        images_uri=Utilities.getInstance(getApplicationContext()).ImagesUri();
 
         cathegoryAdapter=new CathegoryAdapter();
         gridView.setAdapter(cathegoryAdapter);
@@ -67,12 +69,12 @@ public class CathegoryActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return images_id.size();
+            return images_uri.size();
         }
 
         @Override
         public Object getItem(int position) {
-            return images_id.get(position);
+            return images_uri.get(position);
         }
 
         @Override
@@ -91,8 +93,9 @@ public class CathegoryActivity extends AppCompatActivity {
             final ImageView imageView = (ImageView)convertView.findViewById(R.id.imageview_cathegory);
             final TextView nameTextView = (TextView)convertView.findViewById(R.id.textview_cathegory);
 
-            imageView.setImageResource((int)images_id.get(position));
-            System.out.println(names.size());
+            ImageLoader.getInstance().displayImage((String)Utilities.getInstance(getApplicationContext()).ImagesUri().get(position),imageView);
+           // imageView.setImageResource((int)images_id.get(position));
+
             nameTextView.setText(names.get(position));
             return convertView;
         }
